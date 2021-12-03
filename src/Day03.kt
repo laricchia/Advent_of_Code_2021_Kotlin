@@ -34,8 +34,38 @@ fun firstPart03(lists : List<List<Int>>) {
 
 }
 
-fun secondPart03() {
+fun secondPart03(lists : List<List<Int>>) {
+    var oxGenRatingPossibleValues = lists
+    var co2ScrubRatingPossibleValues = lists
 
+    var i = 0
+    while (oxGenRatingPossibleValues.size != 1) {
+        val toConsider = oxGenRatingPossibleValues.toNDArray().transpose()
+        val colNumber = toConsider.shape[1]
+
+        val oneCount = toConsider[i].count { it == 1 }
+
+        val shouldKeepOne = toConsider[i].count { it == 1 } >= (colNumber - oneCount)
+        oxGenRatingPossibleValues = (if (shouldKeepOne) oxGenRatingPossibleValues.filter { it[i] == 1 } else oxGenRatingPossibleValues.filter { it[i] == 0 })
+        i++
+    }
+
+    i = 0
+    while (co2ScrubRatingPossibleValues.size != 1) {
+        val toConsider = co2ScrubRatingPossibleValues.toNDArray().transpose()
+        val colNumber = toConsider.shape[1]
+
+        val zeroCount = toConsider[i].count { it == 0 }
+
+        val shouldKeepZero = zeroCount <= (colNumber - zeroCount)
+        co2ScrubRatingPossibleValues = (if (shouldKeepZero) co2ScrubRatingPossibleValues.filter { it[i] == 0 } else co2ScrubRatingPossibleValues.filter { it[i] == 1 })
+        i++
+    }
+
+    val oxygenRating = Integer.parseInt(oxGenRatingPossibleValues.first().joinToString(separator = ""), 2)
+    val co2Rating = Integer.parseInt(co2ScrubRatingPossibleValues.first().joinToString(separator = ""), 2)
+
+    println(oxygenRating * co2Rating)
 }
 
 
@@ -45,4 +75,5 @@ fun main() {
     val lists = input.filter { it.isNotEmpty() }.map { it.split("").filter { it.isNotEmpty() }.map { it.toInt() } }
 
     firstPart03(lists)
+    secondPart03(lists)
 }
