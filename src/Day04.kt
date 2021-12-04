@@ -1,0 +1,50 @@
+import org.jetbrains.kotlinx.multik.api.toNDArray
+import org.jetbrains.kotlinx.multik.ndarray.operations.toListD2
+
+fun firstPart04(list : List<String>) {
+    val extractions = list.first().split(",").map { it.toInt() }
+
+    val tables = list.subList(1, list.size).map { it.split(" ").filter { it.isNotEmpty() }.map { it.toInt() } }.chunked(5)
+    val tablesAndTransposed = tables.map {
+        listOf(it, it.toNDArray().transpose().toListD2())
+    }.flatten()
+
+    val currentExtraction = extractions.subList(0, 5).toMutableList()
+    var winnerSum = 0
+    extraction@ for (extractedNumber in extractions.subList(5, extractions.size)) {
+        currentExtraction.add(extractedNumber)
+        for (currentTable in tablesAndTransposed) {
+            val isBingo = checkBingo(currentExtraction, currentTable)
+            if (isBingo.first) {
+                winnerSum = isBingo.second
+                break@extraction
+            }
+        }
+    }
+
+    println(winnerSum * currentExtraction.last())
+
+}
+
+fun checkBingo(extractions : List<Int>, table : List<List<Int>>) : Pair<Boolean, Int> {
+    table.map {
+        if (extractions.containsAll(it)) {
+            val sumOfNotExtracted = table.flatten().filter { it !in extractions }.sum()
+            return true to sumOfNotExtracted
+        }
+    }
+    return false to 0
+}
+
+fun secondPart04() {
+
+}
+
+
+fun main() {
+
+    val input : List<String> = readInput("Day04")
+    val list = input.filter { it.isNotBlank() }
+
+    firstPart04(list)
+}
