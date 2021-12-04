@@ -36,8 +36,38 @@ fun checkBingo(extractions : List<Int>, table : List<List<Int>>) : Pair<Boolean,
     return false to 0
 }
 
-fun secondPart04() {
+fun secondPart04(list : List<String>) {
+    val extractions = list.first().split(",").map { it.toInt() }
 
+    val tables = list.subList(1, list.size).map { it.split(" ").filter { it.isNotEmpty() }.map { it.toInt() } }.chunked(5)
+    val tablesAndTransposed = tables.map {
+        it to it.toNDArray().transpose().toListD2()
+    }
+
+    val currentPossibleTables = tablesAndTransposed.toMutableList()
+    val currentExtraction = extractions.subList(0, 5).toMutableList()
+    var winnerSum = 0
+    var lastWinnerExtractedNumber = 0
+
+    for (extractedNumber in extractions.subList(5, extractions.size)) {
+        currentExtraction.add(extractedNumber)
+        val toBeRemoved = mutableListOf<Pair<List<List<Int>>, List<List<Int>>>>()
+        for (currentTable in currentPossibleTables) {
+            val isBingoFirst = checkBingo(currentExtraction, currentTable.first)
+            val isBingoSecond = checkBingo(currentExtraction, currentTable.second)
+
+            if (isBingoFirst.first) { winnerSum = isBingoFirst.second }
+            if (isBingoSecond.first) { winnerSum = isBingoSecond.second }
+
+            if (isBingoFirst.first || isBingoSecond.first) {
+                toBeRemoved.add(currentTable)
+                lastWinnerExtractedNumber = currentExtraction.last()
+            }
+        }
+        currentPossibleTables.removeAll(toBeRemoved)
+    }
+
+    println(winnerSum * lastWinnerExtractedNumber)
 }
 
 
@@ -47,4 +77,5 @@ fun main() {
     val list = input.filter { it.isNotBlank() }
 
     firstPart04(list)
+    secondPart04(list)
 }
